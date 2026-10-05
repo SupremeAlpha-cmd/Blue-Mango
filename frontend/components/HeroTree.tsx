@@ -7,6 +7,8 @@
  */
 export default function HeroTree() {
   const mangoes: { x: number; y: number; s: number; flip?: boolean }[] = [
+    { x: 172, y: 96, s: 0.9 },
+    { x: 238, y: 102, s: 0.85, flip: true },
     { x: 118, y: 148, s: 1.15 },
     { x: 196, y: 118, s: 0.95, flip: true },
     { x: 268, y: 156, s: 1.2 },
@@ -56,6 +58,31 @@ export default function HeroTree() {
         {/* branch highlight lines */}
         <path d="M160,216 C122,197 100,179 84,152" style={{ stroke: "var(--bark-line)" }} strokeWidth={2.5} opacity={0.5} />
         <path d="M188,246 C220,237 248,230 276,224" style={{ stroke: "var(--bark-line)" }} strokeWidth={2.5} opacity={0.5} />
+      </g>
+
+      {/* leafy canopy crown — the tree's top */}
+      <g opacity={0.95}>
+        {/* back layer, deep green */}
+        <g fill="#2d5a3d">
+          <ellipse cx={140} cy={88} rx={58} ry={40} />
+          <ellipse cx={205} cy={66} rx={62} ry={44} />
+          <ellipse cx={268} cy={92} rx={54} ry={38} />
+          <ellipse cx={105} cy={122} rx={40} ry={30} />
+          <ellipse cx={292} cy={128} rx={38} ry={28} />
+        </g>
+        {/* front layer, lighter */}
+        <g fill="#3d7a4d">
+          <ellipse cx={165} cy={105} rx={46} ry={32} />
+          <ellipse cx={225} cy={88} rx={48} ry={34} />
+          <ellipse cx={130} cy={130} rx={34} ry={24} />
+          <ellipse cx={258} cy={128} rx={34} ry={24} />
+        </g>
+        {/* highlight flecks */}
+        <g fill="#4d8f4d" opacity={0.8}>
+          <ellipse cx={190} cy={80} rx={26} ry={18} />
+          <ellipse cx={240} cy={108} rx={20} ry={14} />
+          <ellipse cx={148} cy={112} rx={18} ry={13} />
+        </g>
       </g>
 
       {/* hanging blue mangoes */}
