@@ -23,7 +23,7 @@ export default function ConnectButton() {
       disabled={!injected || isPending}
       onClick={() => injected && connect({ connector: injected })}
     >
-      {isPending ? "Connecting…" : "Connect wallet"}
+      {isPending ? "Connecting…" : (<><span className="cb-full">Connect wallet</span><span className="cb-short">Connect</span></>)}
     </button>
   );
 }
