@@ -10,3 +10,5 @@ build/
 contracts/cache/
 contracts/out/
 contracts/broadcast/
+hidden_files/
+.env.local

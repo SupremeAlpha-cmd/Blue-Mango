@@ -42,12 +42,13 @@ export const ERC20_ABI = [
 /** 0=Pending 1=Done 2=Disputed 3=Released 4=Refunded */
 export const MILESTONE_STATES = ["Pending", "Done", "Disputed", "Released", "Refunded"] as const;
 
+/** @deprecated — use MANGO_STATE_COLORS from @/components/icons instead */
 export const STATE_COLORS: Record<number, string> = {
-  0: "#64748b", // pending — slate
-  1: "#3b82f6", // done — blue
-  2: "#f59e0b", // disputed — mango amber
-  3: "#10b981", // released — green
-  4: "#6b7280", // refunded — gray
+  0: "#8fa383", // pending — unripe sage
+  1: "#3f8cff", // done — vivid blue
+  2: "#8f5e1c", // disputed — bruised bronze
+  3: "#f0b429", // released — ripe gold
+  4: "#78716c", // refunded — fallen gray
 };
 
 export function fmtUsdg(raw: bigint): string {

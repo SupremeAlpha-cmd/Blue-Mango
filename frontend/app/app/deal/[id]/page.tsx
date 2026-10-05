@@ -11,6 +11,7 @@ import {
 } from "wagmi";
 import AppNav from "@/components/AppNav";
 import DealTree from "@/components/DealTree";
+import { IconTree, IconAlert } from "@/components/icons";
 import {
   BLUE_MANGO_ABI,
   BLUE_MANGO_ADDRESS,
@@ -130,7 +131,7 @@ export default function DealDetail() {
       <AppNav />
       <div className="wrap" style={{ maxWidth: 760 }}>
         <div className="app-head">
-          <h1>🌳 Deal #{params.id}</h1>
+          <h1><IconTree size={26} /> Deal #{params.id}</h1>
           <span className="pill">
             {isPayer ? "You are the payer" : isPayee ? "You are the payee" : isArbiter ? "You are the arbiter" : "Viewer"}
           </span>
@@ -161,7 +162,7 @@ export default function DealDetail() {
         </div>
 
         {sel && selected != null && (
-          <div className="card" style={{ marginTop: 18, borderColor: "var(--mango)" }}>
+          <div className="card" style={{ marginTop: 18, borderColor: "var(--fruit)" }}>
             <h3 style={{ margin: "0 0 4px" }}>
               {sel.description || `Milestone ${selected + 1}`}
             </h3>
@@ -183,7 +184,7 @@ export default function DealDetail() {
               {sel.state === 2 && isArbiter && btn("Refund payer", "resolveDispute", [id, BigInt(selected), false])}
               {sel.state >= 3 && <span style={{ color: "var(--muted)", fontSize: 14 }}>Terminal — no further actions.</span>}
             </div>
-            {error && <div className="tx-status" style={{ color: "var(--red)" }}>⚠️ {error}</div>}
+            {error && <div className="tx-status" style={{ color: "var(--red)" }}><IconAlert size={15} /> {error}</div>}
             {txHash && <div className="tx-status">Tx: <span className="addr">{txHash}</span></div>}
           </div>
         )}

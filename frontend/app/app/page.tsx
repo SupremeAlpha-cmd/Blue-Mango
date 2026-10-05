@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useAccount, useReadContract, useReadContracts } from "wagmi";
 import AppNav from "@/components/AppNav";
 import DealTree from "@/components/DealTree";
+import { IconTree, IconAlert, IconPlus, IconMango } from "@/components/icons";
 import {
   BLUE_MANGO_ABI,
   BLUE_MANGO_ADDRESS,
@@ -53,7 +54,7 @@ function DealCard({ id, me }: { id: bigint; me: `0x${string}` }) {
     <Link href={`/app/deal/${id.toString()}`} className="card" style={{ display: "block" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
         <span className="pill">
-          <span className="dot" style={{ background: "var(--mango)" }} />
+          <span className="dot" style={{ background: "var(--fruit)" }} />
           Deal #{id.toString()} · {role}
         </span>
         <span className="addr">{shortAddr(counter)}</span>
@@ -90,18 +91,19 @@ export default function Dashboard() {
       <AppNav />
       <div className="wrap">
         <div className="app-head">
-          <h1>🌳 Your deals</h1>
+          <h1><IconTree size={26} /> Your deals</h1>
           {isConnected && (
             <Link href="/app/new" className="btn btn-primary btn-sm">
-              + New deal
+              <IconPlus size={15} /> New deal
             </Link>
           )}
         </div>
 
         {!isConfigured && (
           <div className="notice">
-            ⚠️ Contract not configured — set <b>NEXT_PUBLIC_BLUEMANGO_ADDRESS</b> and{" "}
-            <b>NEXT_PUBLIC_USDG_ADDRESS</b> in <b>.env.local</b> (see .env.example), then restart.
+            <IconAlert size={17} />
+            <span>Contract not configured — set <b>NEXT_PUBLIC_BLUEMANGO_ADDRESS</b> and{" "}
+            <b>NEXT_PUBLIC_USDG_ADDRESS</b> in <b>.env.local</b> (see .env.example), then restart.</span>
           </div>
         )}
 
@@ -114,8 +116,8 @@ export default function Dashboard() {
           <div className="card" style={{ textAlign: "center", padding: 60 }}>
             <h3 style={{ marginTop: 0 }}>No deals yet</h3>
             <p>Plant your first one — it takes under a minute.</p>
-            <Link href="/app/new" className="btn btn-mango" style={{ marginTop: 12 }}>
-              Create a deal
+            <Link href="/app/new" className="btn btn-primary" style={{ marginTop: 12 }}>
+              <IconMango size={17} /> Create a deal
             </Link>
           </div>
         ) : (

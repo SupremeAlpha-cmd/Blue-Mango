@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import AppNav from "@/components/AppNav";
+import { IconSprout, IconAlert, IconX, IconPlus } from "@/components/icons";
 import {
   BLUE_MANGO_ABI,
   BLUE_MANGO_ADDRESS,
@@ -101,11 +102,11 @@ export default function NewDeal() {
       <AppNav />
       <div className="wrap" style={{ maxWidth: 680 }}>
         <div className="app-head">
-          <h1>🌱 Plant a new deal</h1>
+          <h1><IconSprout size={26} /> Plant a new deal</h1>
         </div>
 
         {!isConfigured && (
-          <div className="notice">⚠️ Contract not configured — set addresses in .env.local first.</div>
+          <div className="notice"><IconAlert size={17} /><span>Contract not configured — set addresses in .env.local first.</span></div>
         )}
         {!isConnected && (
           <div className="notice">Connect your wallet to create a deal.</div>
@@ -152,8 +153,8 @@ export default function NewDeal() {
                 style={{ flex: 1, background: "var(--bg-deep)", border: "1px solid var(--border)", color: "var(--text)", borderRadius: 12, padding: "12px 14px", fontSize: 15, outline: "none" }}
               />
               {rows.length > 1 && (
-                <button className="btn btn-ghost btn-sm" onClick={() => setRows(rows.filter((_, j) => j !== i))}>
-                  ✕
+                <button className="icon-btn" onClick={() => setRows(rows.filter((_, j) => j !== i))} aria-label="Remove milestone">
+                  <IconX size={17} />
                 </button>
               )}
             </div>
@@ -163,7 +164,7 @@ export default function NewDeal() {
             onClick={() => setRows([...rows, { desc: "", amount: "" }])}
             style={{ marginBottom: 18 }}
           >
-            + Add milestone
+            <IconPlus size={15} /> Add milestone
           </button>
 
           <div
@@ -176,7 +177,7 @@ export default function NewDeal() {
             <b style={{ fontSize: 20 }}>{fmtUsdg(total)} USDG</b>
           </div>
 
-          {error && <div className="notice" style={{ borderColor: "var(--red)" }}>⚠️ {error}</div>}
+          {error && <div className="notice" style={{ borderColor: "var(--red)" }}><IconAlert size={17} /><span>{error}</span></div>}
 
           <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
             <button
