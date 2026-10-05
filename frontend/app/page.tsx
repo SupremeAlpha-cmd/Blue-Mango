@@ -1,6 +1,7 @@
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 import HeroTree from "@/components/HeroTree";
+import Walkthrough from "@/components/Walkthrough";
 import {
   IconLock,
   IconSprout,
@@ -109,6 +110,9 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* VISUAL WALKTHROUGH */}
+      <Walkthrough />
 
       {/* ARBITER */}
       <section id="arbiter" className="section" style={{ paddingTop: 0 }}>
