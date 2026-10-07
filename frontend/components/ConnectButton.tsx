@@ -1,29 +1,32 @@
 "use client";
 
-import { useAccount, useConnect, useDisconnect } from "wagmi";
-import { shortAddr } from "@/lib/contract";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { shortAddr } from "@/lib/program";
 
 export default function ConnectButton() {
-  const { address, isConnected } = useAccount();
-  const { connect, connectors, isPending } = useConnect();
-  const { disconnect } = useDisconnect();
+  const { publicKey, disconnect, connecting } = useWallet();
+  const { setVisible } = useWalletModal();
 
-  if (isConnected && address) {
+  if (publicKey) {
+    const addr = publicKey.toBase58();
     return (
-      <button className="connect-btn" onClick={() => disconnect()} title={address}>
-        {shortAddr(address)}
+      <button className="connect-btn" onClick={() => disconnect()} title={addr}>
+        {shortAddr(addr)}
       </button>
     );
   }
 
-  const injected = connectors[0];
   return (
-    <button
-      className="connect-btn"
-      disabled={!injected || isPending}
-      onClick={() => injected && connect({ connector: injected })}
-    >
-      {isPending ? "Connecting…" : (<><span className="cb-full">Connect wallet</span><span className="cb-short">Connect</span></>)}
+    <button className="connect-btn" disabled={connecting} onClick={() => setVisible(true)}>
+      {connecting ? (
+        "Connecting…"
+      ) : (
+        <>
+          <span className="cb-full">Connect wallet</span>
+          <span className="cb-short">Connect</span>
+        </>
+      )}
     </button>
   );
 }

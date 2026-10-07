@@ -36,7 +36,7 @@ const STEPS = [
   {
     icon: <IconLock size={22} />,
     title: "Lock",
-    text: "The payer creates a deal — payee, milestones with set amounts, and a trusted arbiter — then locks the full amount in USDG. The tree is planted.",
+    text: "The payer creates a deal — payee, milestones with set amounts, and a trusted arbiter — then locks the full amount in SOL or SPL tokens. The tree is planted.",
   },
   {
     icon: <IconSprout size={22} />,
@@ -64,7 +64,7 @@ export default function Landing() {
               Deals grow <span className="mango-word">on trees.</span>
             </h1>
             <p className="sub">
-              Blue-Mango is milestone escrow for crypto deals. Lock USDG in a smart contract,
+              Blue-Mango is milestone escrow for crypto deals. Lock SOL or SPL tokens in a Solana program,
               release it branch by branch as work gets done. No middlemen, no chargebacks,
               no &ldquo;trust me bro&rdquo;.
             </p>
@@ -155,9 +155,9 @@ export default function Landing() {
       <footer className="footer">
         <div className="wrap">
           <span className="fbrand">
-            <IconMango size={17} style={{ color: "var(--fruit)" }} /> Blue-Mango — milestone escrow on Robinhood Chain
+            <IconMango size={17} style={{ color: "var(--fruit)" }} /> Blue-Mango — milestone escrow on Solana
           </span>
-          <span>Settled in USDG · Secured by smart contract</span>
+          <span>Settled in SOL & SPL · Secured by Solana program</span>
         </div>
       </footer>
     </>

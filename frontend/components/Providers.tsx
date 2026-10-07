@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
-import { WagmiProvider } from "wagmi";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { wagmiConfig } from "@/lib/wagmi";
+import { useEffect, useMemo } from "react";
+import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react";
+import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
+import { PhantomWalletAdapter, SolflareWalletAdapter } from "@solana/wallet-adapter-wallets";
+import { SOLANA_RPC } from "@/lib/solana";
 
-const queryClient = new QueryClient();
+import "@solana/wallet-adapter-react-ui/styles.css";
 
 function ThemeInit() {
   useEffect(() => {
@@ -18,12 +19,19 @@ function ThemeInit() {
 }
 
 export default function Providers({ children }: { children: React.ReactNode }) {
+  const wallets = useMemo(
+    () => [new PhantomWalletAdapter(), new SolflareWalletAdapter()],
+    []
+  );
+
   return (
-    <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <ThemeInit />
-        {children}
-      </QueryClientProvider>
-    </WagmiProvider>
+    <ConnectionProvider endpoint={SOLANA_RPC}>
+      <WalletProvider wallets={wallets} autoConnect>
+        <WalletModalProvider>
+          <ThemeInit />
+          {children}
+        </WalletModalProvider>
+      </WalletProvider>
+    </ConnectionProvider>
   );
 }

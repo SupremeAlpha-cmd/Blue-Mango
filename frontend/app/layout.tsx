@@ -5,7 +5,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Blue-Mango — Milestone escrow for crypto deals",
   description:
-    "Lock USDG in a smart contract, release it milestone by milestone. No middlemen, no chargebacks, no “trust me bro”.",
+    "Lock SOL or SPL tokens in a Solana program, release it milestone by milestone. No middlemen, no chargebacks, no “trust me bro”.",
   icons: { icon: "/logo.webp", apple: "/logo.webp" },
 };
 

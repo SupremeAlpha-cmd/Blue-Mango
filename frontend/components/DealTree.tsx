@@ -1,6 +1,6 @@
 "use client";
 
-import { MILESTONE_STATES, fmtUsdg, type MilestoneView } from "@/lib/contract";
+import { MILESTONE_STATES, fmtToken, type MilestoneView } from "@/lib/program";
 import { IconMango, MANGO_STATE_COLORS } from "@/components/icons";
 
 interface Props {
@@ -9,6 +9,8 @@ interface Props {
   compact?: boolean;
   onSelect?: (idx: number) => void;
   selected?: number | null;
+  symbol?: string;
+  decimals?: number;
 }
 
 /**
@@ -18,7 +20,7 @@ interface Props {
  * unripe sage = pending, vivid blue = done, bruised = disputed,
  * ripe gold = released, fallen gray = refunded.
  */
-export default function DealTree({ milestones, total, compact, onSelect, selected }: Props) {
+export default function DealTree({ milestones, total, compact, onSelect, selected, symbol = "", decimals = 6 }: Props) {
   const W = 440;
   const rowH = compact ? 92 : 118;
   const topPad = 132;
@@ -62,7 +64,7 @@ export default function DealTree({ milestones, total, compact, onSelect, selecte
             DEAL LOCKED
           </text>
           <text x={cx} y={78} textAnchor="middle" style={{ fill: "var(--text)" }} fontSize={18} fontWeight={800} fontFamily="var(--serif)">
-            {fmtUsdg(total)} USDG
+            {fmtToken(total, decimals)}{symbol ? ` ${symbol}` : ""}
           </text>
         </g>
 
@@ -195,7 +197,7 @@ export default function DealTree({ milestones, total, compact, onSelect, selecte
                 fontSize={compact ? 13 : 14}
                 fontWeight={800}
               >
-                {fmtUsdg(m.amount)}
+                {fmtToken(m.amount, decimals)}
               </text>
               <text
                 x={nx}
