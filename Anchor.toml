@@ -1,0 +1,21 @@
+[features]
+seeds = true
+skip-lint = false
+
+[programs.localnet]
+# PLACEHOLDER — replace with the real program id after `anchor build`
+# and `anchor keys sync` on a machine with the Solana toolchain.
+blue_mango = "11111111111111111111111111111111"
+
+[programs.devnet]
+blue_mango = "11111111111111111111111111111111"
+
+[registry]
+url = "https://api.github.com/repos/coral-xyz/anchor"
+
+[provider]
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

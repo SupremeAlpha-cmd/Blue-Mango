@@ -55,21 +55,21 @@ export default function Walkthrough() {
           >
             <div className="wt-card">
               <Field label="Deal title" value="Website redesign" />
-              <Field label="Payee" value="0x2aC2…D3b8" mono />
-              <Field label="Arbiter" value="0x7099…79C8" mono />
+              <Field label="Payee" value="7xKp…9Yt2" mono />
+              <Field label="Arbiter" value="3mQv…8Xw1" mono />
               <div className="wt-milestones">
                 <div className="wt-ms">
                   <span>Design logo</span>
-                  <b>20 USDG</b>
+                  <b>20 USDC</b>
                 </div>
                 <div className="wt-ms">
                   <span>Build landing page</span>
-                  <b>30 USDG</b>
+                  <b>30 USDC</b>
                 </div>
               </div>
               <div className="wt-total">
                 <span>Locked total</span>
-                <b>50 USDG</b>
+                <b>50 USDC</b>
               </div>
               <div className="wt-btn">Plant the deal</div>
             </div>
@@ -79,7 +79,7 @@ export default function Walkthrough() {
           <StepShell
             n="02"
             title="Lock the funds"
-            text="The payer approves the contract to pull 50 USDG, then funds the deal. The money leaves the wallet and sits in the tree trunk — visible to everyone, touchable by no one."
+            text="The payer approves the contract to pull 50 USDC, then funds the deal. The money leaves the wallet and sits in the tree trunk — visible to everyone, touchable by no one."
           >
             <div className="wt-card wt-center">
               <div className="wt-lockrow">
@@ -87,15 +87,15 @@ export default function Walkthrough() {
                   <IconCheck size={18} />
                 </span>
                 <span>
-                  Approved <b className="mono">50 USDG</b>
+                  Approved <b className="mono">50 USDC</b>
                 </span>
               </div>
               <div className="wt-trunk">
                 <IconLock size={26} />
-                <b>50 USDG</b>
-                <span>locked in contract</span>
+                <b>50 USDC</b>
+                <span>locked in vault</span>
               </div>
-              <div className="wt-note">0x3943…CaBec · Robinhood testnet</div>
+              <div className="wt-note">7xKp…9Yt2 · Solana devnet</div>
             </div>
           </StepShell>
 
@@ -112,7 +112,7 @@ export default function Walkthrough() {
                 </span>
                 <span className="wt-binfo">
                   <b>Design logo</b>
-                  <span>20 USDG · marked done</span>
+                  <span>20 USDC · marked done</span>
                 </span>
                 <span className="wt-pill done">Done</span>
               </div>
@@ -122,7 +122,7 @@ export default function Walkthrough() {
                 </span>
                 <span className="wt-binfo">
                   <b>Build landing page</b>
-                  <span>30 USDG · in progress</span>
+                  <span>30 USDC · in progress</span>
                 </span>
                 <span className="wt-pill">Pending</span>
               </div>
@@ -134,7 +134,7 @@ export default function Walkthrough() {
           <StepShell
             n="04"
             title="Release the mango"
-            text="The payer approves the finished logo. 20 USDG flows straight to the payee — no invoices, no waiting, no stories. The mango turns gold."
+            text="The payer approves the finished logo. 20 USDC flows straight to the payee — no invoices, no waiting, no stories. The mango turns gold."
           >
             <div className="wt-card wt-center">
               <div className="wt-flow">
@@ -143,8 +143,8 @@ export default function Walkthrough() {
                 </span>
                 <IconArrowRight size={20} />
                 <span className="wt-amt">
-                  <b>20 USDG</b>
-                  <span>to 0x2aC2…D3b8</span>
+                  <b>20 USDC</b>
+                  <span>to 7xKp…9Yt2</span>
                 </span>
               </div>
               <div className="wt-lockrow">

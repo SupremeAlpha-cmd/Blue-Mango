@@ -2,18 +2,32 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { PublicKey, SystemProgram } from "@solana/web3.js";
 import AppNav from "@/components/AppNav";
 import { IconSprout, IconAlert, IconX, IconPlus } from "@/components/icons";
 import {
-  BLUE_MANGO_ABI,
-  BLUE_MANGO_ADDRESS,
-  USDG_ADDRESS,
-  ERC20_ABI,
+  ataFor,
+  bn,
+  dealPda,
+  fetchRegistry,
+  fmtToken,
+  isValidPubkey,
+  maybeCreateAtaIx,
+  parseToken,
+  registryPda,
+  useBlueMango,
+  vaultPda,
+  TOKEN_PROGRAM_ID,
+} from "@/lib/program";
+import {
+  PAYMENT_DECIMALS,
+  PAYMENT_MINT,
+  PAYMENT_SYMBOL,
+  SOL_DECIMALS,
+  SOL_SYMBOL,
   isConfigured,
-  parseUsdg,
-  fmtUsdg,
-} from "@/lib/contract";
+} from "@/lib/solana";
 
 interface Row {
   desc: string;
@@ -22,80 +36,96 @@ interface Row {
 
 export default function NewDeal() {
   const router = useRouter();
-  const { address, isConnected } = useAccount();
+  const { connection } = useConnection();
+  const { publicKey, connected } = useWallet();
+  const program = useBlueMango();
+
   const [payee, setPayee] = useState("");
   const [arbiter, setArbiter] = useState("");
+  const [asset, setAsset] = useState<"SOL" | "SPL">("SOL");
   const [rows, setRows] = useState<Row[]>([
     { desc: "", amount: "" },
     { desc: "", amount: "" },
   ]);
-  const [step, setStep] = useState<"form" | "approve" | "create" | "done">("form");
+  const [step, setStep] = useState<"form" | "creating" | "done">("form");
   const [error, setError] = useState("");
+  const [registryOk, setRegistryOk] = useState<boolean | null>(null);
 
-  const { writeContractAsync } = useWriteContract();
-  const [txHash, setTxHash] = useState<`0x${string}` | undefined>();
-  const { isSuccess: txConfirmed } = useWaitForTransactionReceipt({ hash: txHash });
+  const decimals = asset === "SOL" ? SOL_DECIMALS : PAYMENT_DECIMALS;
+  const symbol = asset === "SOL" ? SOL_SYMBOL : PAYMENT_SYMBOL;
 
-  const { data: dealCount } = useReadContract({
-    address: BLUE_MANGO_ADDRESS,
-    abi: BLUE_MANGO_ABI,
-    functionName: "dealCount",
-    query: { enabled: isConfigured },
-  });
+  useEffect(() => {
+    if (!program) return;
+    fetchRegistry(program).then((r) => setRegistryOk(!!r));
+  }, [program]);
 
   const validRows = rows.filter((r) => r.desc.trim() && Number(r.amount) > 0);
-  const total = validRows.reduce((s, r) => s + parseUsdg(r.amount), 0n);
+  const total = validRows.reduce((s, r) => s + parseToken(r.amount, decimals), 0n);
 
   const setRow = (i: number, patch: Partial<Row>) =>
     setRows(rows.map((r, j) => (j === i ? { ...r, ...patch } : r)));
 
-  async function handleApprove() {
+  const formValid =
+    connected &&
+    isConfigured &&
+    registryOk &&
+    isValidPubkey(payee) &&
+    isValidPubkey(arbiter) &&
+    validRows.length > 0 &&
+    total > 0n &&
+    (asset === "SOL" || PAYMENT_MINT.length > 0);
+
+  async function handleCreate() {
+    if (!program || !publicKey) return;
     setError("");
+    setStep("creating");
     try {
-      setStep("approve");
-      const h = await writeContractAsync({
-        address: USDG_ADDRESS,
-        abi: ERC20_ABI,
-        functionName: "approve",
-        args: [BLUE_MANGO_ADDRESS, total],
-      });
-      setTxHash(h);
+      const reg = await fetchRegistry(program);
+      if (!reg) throw new Error("Program registry not initialized.");
+      const dealId = reg.nextDealId;
+      const deal = dealPda(dealId);
+      const payeePk = new PublicKey(payee.trim());
+      const arbiterPk = new PublicKey(arbiter.trim());
+      const descriptions = validRows.map((r) => r.desc.trim().slice(0, 128));
+      const amounts = validRows.map((r) => bn(parseToken(r.amount, decimals)));
+
+      if (asset === "SOL") {
+        await (program.methods as any)
+          .createDealSol(bn(dealId), payeePk, arbiterPk, descriptions, amounts)
+          .accounts({
+            registry: registryPda(),
+            deal,
+            payer: publicKey,
+            systemProgram: SystemProgram.programId,
+          })
+          .rpc();
+      } else {
+        const mint = new PublicKey(PAYMENT_MINT);
+        const payerAta = ataFor(mint, publicKey);
+        const preIx = await maybeCreateAtaIx(connection, mint, publicKey, publicKey);
+        await (program.methods as any)
+          .createDealSpl(bn(dealId), payeePk, arbiterPk, descriptions, amounts)
+          .accounts({
+            registry: registryPda(),
+            deal,
+            vault: vaultPda(deal),
+            payerAta,
+            mint,
+            payer: publicKey,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            systemProgram: SystemProgram.programId,
+          })
+          .preInstructions(preIx)
+          .rpc();
+      }
+
+      setStep("done");
+      router.push(`/app/deal/${dealId.toString()}`);
     } catch (e: any) {
-      setError(e?.shortMessage || e?.message || "Approval failed");
+      setError(e?.message || "Create failed");
       setStep("form");
     }
   }
-
-  async function handleCreate() {
-    setError("");
-    try {
-      setStep("create");
-      const h = await writeContractAsync({
-        address: BLUE_MANGO_ADDRESS,
-        abi: BLUE_MANGO_ABI,
-        functionName: "createDeal",
-        args: [
-          payee as `0x${string}`,
-          arbiter as `0x${string}`,
-          validRows.map((r) => r.desc.trim()),
-          validRows.map((r) => parseUsdg(r.amount)),
-          total,
-        ],
-      });
-      setTxHash(h);
-      setStep("done");
-    } catch (e: any) {
-      setError(e?.shortMessage || e?.message || "Create failed");
-      setStep("approve");
-    }
-  }
-
-  // after create tx confirms, jump to the new deal
-  useEffect(() => {
-    if (step === "done" && txConfirmed && typeof dealCount === "bigint") {
-      router.push(`/app/deal/${(dealCount - 1n).toString()}`);
-    }
-  }, [step, txConfirmed, dealCount, router]);
 
   return (
     <>
@@ -106,9 +136,12 @@ export default function NewDeal() {
         </div>
 
         {!isConfigured && (
-          <div className="notice"><IconAlert size={17} /><span>Contract not configured — set addresses in .env.local first.</span></div>
+          <div className="notice"><IconAlert size={17} /><span>Program not configured — set NEXT_PUBLIC_PROGRAM_ID in .env.local first.</span></div>
         )}
-        {!isConnected && (
+        {isConfigured && registryOk === false && (
+          <div className="notice"><IconAlert size={17} /><span>Program registry not initialized yet — the deployer must run <b>initialize_registry</b> once.</span></div>
+        )}
+        {!connected && (
           <div className="notice">Connect your wallet to create a deal.</div>
         )}
 
@@ -116,7 +149,7 @@ export default function NewDeal() {
           <div className="field">
             <label>Payee address</label>
             <input
-              placeholder="0x…"
+              placeholder="Solana address…"
               value={payee}
               onChange={(e) => setPayee(e.target.value)}
               spellCheck={false}
@@ -125,11 +158,31 @@ export default function NewDeal() {
           <div className="field">
             <label>Arbiter address (neutral third party)</label>
             <input
-              placeholder="0x…"
+              placeholder="Solana address…"
               value={arbiter}
               onChange={(e) => setArbiter(e.target.value)}
               spellCheck={false}
             />
+          </div>
+
+          <label
+            style={{ display: "block", fontSize: 13, fontWeight: 700, color: "var(--muted)", margin: "22px 0 10px", textTransform: "uppercase", letterSpacing: "0.06em" }}
+          >
+            Escrow asset
+          </label>
+          <div style={{ display: "flex", gap: 10, marginBottom: 6 }}>
+            {(["SOL", "SPL"] as const).map((a) => (
+              <button
+                key={a}
+                type="button"
+                className={`btn btn-sm ${asset === a ? "btn-primary" : "btn-ghost"}`}
+                onClick={() => setAsset(a)}
+                disabled={a === "SPL" && !PAYMENT_MINT}
+                title={a === "SPL" && !PAYMENT_MINT ? "Set NEXT_PUBLIC_PAYMENT_MINT first" : undefined}
+              >
+                {a === "SOL" ? "SOL" : PAYMENT_SYMBOL}
+              </button>
+            ))}
           </div>
 
           <label
@@ -146,7 +199,7 @@ export default function NewDeal() {
                 style={{ flex: 3, background: "var(--bg-deep)", border: "1px solid var(--border)", color: "var(--text)", borderRadius: 12, padding: "12px 14px", fontSize: 15, outline: "none" }}
               />
               <input
-                placeholder="USDG"
+                placeholder={symbol}
                 inputMode="decimal"
                 value={r.amount}
                 onChange={(e) => setRow(i, { amount: e.target.value })}
@@ -174,31 +227,24 @@ export default function NewDeal() {
             }}
           >
             <span style={{ color: "var(--muted)", fontWeight: 700 }}>Total to lock</span>
-            <b style={{ fontSize: 20 }}>{fmtUsdg(total)} USDG</b>
+            <b style={{ fontSize: 20 }}>{fmtToken(total, decimals)} {symbol}</b>
           </div>
 
           {error && <div className="notice" style={{ borderColor: "var(--red)" }}><IconAlert size={17} /><span>{error}</span></div>}
 
           <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
             <button
-              className="btn btn-ghost"
-              style={{ flex: 1 }}
-              disabled={!isConnected || !isConfigured || validRows.length === 0 || step !== "form" || !payee || !arbiter}
-              onClick={handleApprove}
-            >
-              {step === "approve" && !txConfirmed ? "Approving…" : "1 · Approve USDG"}
-            </button>
-            <button
               className="btn btn-primary"
               style={{ flex: 1 }}
-              disabled={step !== "approve" || !txConfirmed}
+              disabled={!formValid || step !== "form"}
               onClick={handleCreate}
             >
-              {step === "create" ? "Creating…" : step === "done" ? "Opening deal…" : "2 · Create deal"}
+              {step === "creating" ? "Creating…" : step === "done" ? "Opening deal…" : "Create & fund deal"}
             </button>
           </div>
           <p className="tx-status">
-            Two steps: first approve Blue-Mango to pull {fmtUsdg(total)} USDG, then create &amp; fund the deal in one transaction.
+            One transaction: {fmtToken(total, decimals)} {symbol} moves straight from your wallet into the deal vault.
+            No separate approval step on Solana.
           </p>
         </div>
         <div style={{ height: 60 }} />
